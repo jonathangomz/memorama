@@ -3,17 +3,17 @@
     <div class="num-pairs">
       <select
         class="select-num-pairs"
-        v-bind:value="num_pairs"
+        v-model="num_pairs"
         v-on:change="updateBoard($event)"
       >
         <option disabled value="">Seleccione un elemento</option>
         <option
-          v-for="num of max_pairs"
-          v-bind:key="num - 1 + num_pairs"
-          v-bind:value="num - 1 + num_pairs"
-          v-bind:selected="num_pairs === num - 1 + num_pairs"
+          v-for="num of limits.max"
+          v-bind:key="num - 1 + limits.min"
+          v-bind:value="num - 1 + limits.min"
+          v-bind:selected="num_pairs === num - 1 + limits.min"
         >
-          {{ num - 1 + num_pairs }}
+          {{ num - 1 + limits.min }}
         </option>
       </select>
     </div>
@@ -80,7 +80,10 @@ export default {
   data: function () {
     return {
       num_pairs: 8,
-      max_pairs: 16,
+      limits: {
+        min: 8,
+        max: 16,
+      },
       board: [],
       selecteds: [],
       hidden: [],
@@ -90,7 +93,7 @@ export default {
   },
   components: { Card },
   created() {
-    const falseArray = [...new Array(this.max_pairs)].map(() => false);
+    const falseArray = [...new Array(this.num_pairs)].map(() => false);
     this.selecteds = [...falseArray];
     this.hidden = [...falseArray];
 
@@ -98,7 +101,7 @@ export default {
   },
   methods: {
     restart() {
-      const falseArray = [...new Array(this.max_pairs)].map(() => false);
+      const falseArray = [...new Array(this.num_pairs)].map(() => false);
       this.selecteds = [...falseArray];
       this.hidden = [...falseArray];
     },
@@ -158,10 +161,11 @@ export default {
 }
 
 .cards {
-  max-width: 1024px;
+  max-width: 1414px;
   margin: auto;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  align-content: center;
 }
 </style>
