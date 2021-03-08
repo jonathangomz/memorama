@@ -19,7 +19,6 @@ export default {
 <style scoped>
 .card {
   border: 1px solid black;
-  overflow: hidden;
 }
 
 .image {
