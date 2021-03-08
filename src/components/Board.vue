@@ -1,7 +1,11 @@
 <template>
   <div class="board">
-    <div class="num-cards">
-      <select v-bind:value="num_pairs" v-on:change="updateBoard($event)">
+    <div class="num-pairs">
+      <select
+        class="select-num-pairs"
+        v-bind:value="num_pairs"
+        v-on:change="updateBoard($event)"
+      >
         <option disabled value="">Seleccione un elemento</option>
         <option
           v-for="num of max_pairs"
@@ -70,7 +74,7 @@ const validateIfAllGone = (hidden_cards) => {
   console.log(length);
 
   return length === 0;
-}
+};
 
 export default {
   data: function () {
@@ -93,7 +97,13 @@ export default {
     this.board = constructBoard();
   },
   methods: {
+    restart() {
+      const falseArray = [...new Array(this.max_pairs)].map(() => false);
+      this.selecteds = [...falseArray];
+      this.hidden = [...falseArray];
+    },
     updateBoard($event) {
+      this.restart();
       this.board = constructBoard(
         getImagesList($event ? Number($event.target.value) : 8)
       );
@@ -135,9 +145,18 @@ export default {
 </script>
 
 <style scoped>
-.num-cards {
-  margin: 10px;
+.num-pairs {
+  margin: 18px;
 }
+
+.select-num-pairs {
+  padding: 8px;
+  background: transparent;
+  border-radius: 5px;
+  border-color: #4281A4;
+  color: #4281A4;
+}
+
 .cards {
   max-width: 1024px;
   margin: auto;
