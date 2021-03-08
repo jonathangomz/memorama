@@ -1,19 +1,23 @@
 <template>
-  <div class="card">
-    <img class="image" v-bind:src="image" alt="Card Image">
+  <div class="flip-card" v-bind:class="{ active: isActive, hide : isHidden }">
+    <div class="flip-card-inner">
+      <div class="flip-card-front">
+      </div>
+      <div class="flip-card-back">
+        <img class="image" v-bind:src="image" alt="Card Image" />
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
-  props: ['image']
-}
+  props: ['image', 'isHidden', 'isActive'],
+};
 </script>
 
 <style scoped>
 .card {
-  width: 100%;
-  height: 100px;
   border: 1px solid black;
   overflow: hidden;
 }
@@ -21,5 +25,57 @@ export default {
 .image {
   max-height: 100%;
   width: auto;
+}
+
+.hide .flip-card-inner {
+  display: none;
+}
+
+/* Flip effect */
+/* The flip card container - set the width and height to whatever you want. We have added the border property to demonstrate that the flip itself goes out of the box on hover (remove perspective if you don't want the 3D effect */
+.flip-card {
+  background-color: transparent;
+  width: 200px;
+  height: 200px;
+  border: 1px solid #f1f1f1;
+  perspective: 1000px; /* Remove this if you don't want the 3D effect */
+}
+
+/* This container is needed to position the front and back side */
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+}
+
+/* Do an horizontal flip when you move the mouse over the flip box container */
+.flip-card.active .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+/* Position the front and back side */
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden; /* Safari */
+  backface-visibility: hidden;
+}
+
+/* Style the front side (fallback if image is missing) */
+.flip-card-front {
+  background-color: #54426B;
+  color: black;
+}
+
+/* Style the back side */
+.flip-card-back {
+  background-color: #54426B;
+  color: white;
+  transform: rotateY(180deg);
 }
 </style>

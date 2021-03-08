@@ -3,128 +3,132 @@
     <div class="num-cards">
       <select v-bind:value="num_pairs" v-on:change="updateBoard($event)">
         <option disabled value="">Seleccione un elemento</option>
-        <option value="8">8</option>
-        <option value="9">9</option>
-        <option value="10">10</option>
+        <option
+          v-for="num of max_pairs"
+          v-bind:key="num - 1 + num_pairs"
+          v-bind:value="num - 1 + num_pairs"
+          v-bind:selected="num_pairs === num - 1 + num_pairs"
+        >
+          {{ num - 1 + num_pairs }}
+        </option>
       </select>
     </div>
     <div class="cards">
-      <div class="row" v-for="row of board" v-bind:key="row">
+      <template v-for="(image, index) of board" v-bind:key="index">
         <Card
           class="card"
-          v-for="(img, index) in row"
-          v-bind:key="index"
-          v-bind:image="img"
+          v-on:click="toogleActive(index)"
+          v-bind:image="image"
+          v-bind:isActive="selecteds[index]"
+          v-bind:isHidden="hidden[index]"
         />
-      </div>
+      </template>
     </div>
   </div>
 </template>
 
 <script>
-import axios from "axios";
 import Card from "./Card";
 
-// const getImages = () => {
-//   const url = "https://picsum.photos/200";
-// }
-
-const getDivisibles = (num_cells) => {
-  let last;
-  const divisibles = [];
-  for (let i = 2; i < num_cells; i++) {
-    const result = num_cells / i;
-
-    if (!Number.isInteger(result)) continue;
-    if (!last) last = result;
-
-    divisibles.push(i);
-    if (i === last) break;
-  }
-
-  return divisibles;
-};
-
-const getRowsAndColumns = (num_cells) => {
-  let divisibles = getDivisibles(num_cells);
-
-  let rows, cols;
-  if (Number.isInteger(divisibles.length / 2)) {
-    const center = divisibles.slice(
-      Math.floor(divisibles.length / 2) - 1,
-      Math.ceil(divisibles.length / 2) + 1
-    );
-    rows = center[0];
-    cols = center[1];
-  } else {
-    rows = cols = divisibles[Math.floor(divisibles.length / 2)];
-  }
-
-  return [rows, cols];
-};
-
-const constructBoard = (images) => {
-  const num_cells = images.length * 2;
-  const [rows, cols] = getRowsAndColumns(num_cells);
+const constructBoard = (images = getImagesList()) => {
+  const num_cards = images.length * 2;
   const board = [];
 
-  let used_cells = 0;
-  for (let row of [...Array(rows).keys()]) {
-    board.push([]);
+  const getRandomIndex = (limit) => Math.floor(Math.random() * limit);
 
-    [...Array(cols).keys()].forEach(() => {
-      if (used_cells < num_cells) {
-        board[row].push(images[0]);
-
-        used_cells++;
-      }
-    });
-  }
-
-  const getRandomRowAndColumn = (rows, cols) => [Math.floor(Math.random() * rows), Math.floor(Math.random() * cols)];
   const usedPositions = [];
   for (const image of images) {
     // First Image
-    let row, col;
+    let index;
     do {
-      [row, col] = getRandomRowAndColumn(rows, cols);
-    } while (usedPositions.includes(`${row}${col}`));
+      index = getRandomIndex(num_cards);
+    } while (usedPositions.includes(index));
 
-    console.log('A');
-    board[row][col] = image;
-    console.log('B');
-    usedPositions.push(`${row}${col}`);
+    board[index] = image;
+    usedPositions.push(index);
 
     // Second Image
     do {
-      [row, col] = getRandomRowAndColumn(rows, cols);
-    } while (usedPositions.includes(`${row}${col}`));
+      index = getRandomIndex(num_cards);
+    } while (usedPositions.includes(index));
 
-    board[row][col] = image;
-    usedPositions.push(`${row}${col}`);
+    board[index] = image;
+    usedPositions.push(index);
   }
 
   return board;
 };
 
+const getImagesList = (size) =>
+  Array.from(new Array(size || 8).keys()).map(
+    (i) => `https://source.unsplash.com/random/200x200?sig=${i}`
+  );
+
+const validateIfAllGone = (hidden_cards) => {
+  const length = hidden_cards.filter((isHidden) => !isHidden).length;
+
+  console.log(length);
+
+  return length === 0;
+}
+
 export default {
   data: function () {
     return {
       num_pairs: 8,
+      max_pairs: 16,
       board: [],
+      selecteds: [],
+      hidden: [],
+      selected: undefined,
+      waiting: false,
     };
   },
   components: { Card },
-  mounted() {
-    this.updateBoard();
+  created() {
+    const falseArray = [...new Array(this.max_pairs)].map(() => false);
+    this.selecteds = [...falseArray];
+    this.hidden = [...falseArray];
+
+    this.board = constructBoard();
   },
   methods: {
     updateBoard($event) {
-      this.num_pairs = $event ? Number($event.target.value) : 8;
-      axios
-        .get(`https://picsum.photos/v2/list?limit=${this.num_pairs}`)
-        .then(({ data }) => data.map(({ download_url }) => download_url))
-        .then((images) => (this.board = constructBoard(images)));
+      this.board = constructBoard(
+        getImagesList($event ? Number($event.target.value) : 8)
+      );
+    },
+    toogleActive: function (index) {
+      if (!this.waiting && !this.hidden[index]) {
+        // Flip the selected card
+        this.selecteds[index] = true;
+
+        // The first index is zero and that it's a falsy value
+        if (this.selected === undefined) this.selected = index;
+        else {
+          // Block for all the other cards
+          this.waiting = true;
+          setTimeout(() => {
+            if (this.board[this.selected] === this.board[index]) {
+              this.hidden[this.selected] = true;
+              this.hidden[index] = true;
+            }
+
+            // Flip the cards
+            this.selecteds[index] = false;
+            this.selecteds[this.selected] = false;
+
+            // There is no one selected again
+            this.selected = undefined;
+            // Unblock for all the other cards
+            this.waiting = false;
+
+            if (validateIfAllGone(this.hidden)) {
+              this.board = this.constructBoard();
+            }
+          }, 1500);
+        }
+      }
     },
   },
 };
@@ -135,17 +139,10 @@ export default {
   margin: 10px;
 }
 .cards {
+  max-width: 1024px;
+  margin: auto;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-}
-
-.row {
-  flex-basis: 200px;
-  flex-shrink: 0;
-
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 </style>
