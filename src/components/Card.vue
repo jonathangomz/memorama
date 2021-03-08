@@ -17,10 +17,6 @@ export default {
 </script>
 
 <style scoped>
-.card {
-  border: 1px solid black;
-}
-
 .image {
   max-height: 100%;
   width: auto;
