@@ -68,13 +68,8 @@ const getImagesList = (size) =>
     (i) => `https://source.unsplash.com/random/200x200?sig=${i}`
   );
 
-const validateIfAllGone = (hidden_cards) => {
-  const length = hidden_cards.filter((isHidden) => !isHidden).length;
-
-  console.log(length);
-
-  return length === 0;
-};
+const validateIfAllGone = (hidden_cards) =>
+  hidden_cards.filter((isHidden) => !isHidden).length === 0;
 
 export default {
   data: function () {
@@ -156,8 +151,8 @@ export default {
   padding: 8px;
   background: transparent;
   border-radius: 5px;
-  border-color: #4281A4;
-  color: #4281A4;
+  border-color: #4281a4;
+  color: #4281a4;
 }
 
 .cards {
