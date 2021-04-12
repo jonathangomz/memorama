@@ -1,21 +1,24 @@
 <template>
+  <Timer />
   <Board />
 </template>
 
 <script>
-import Board from './components/Board.vue'
+import Board from "./components/Board.vue";
+import Timer from "./components/Timer.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    Board
-  }
-}
+    Board,
+    Timer,
+  },
+};
 </script>
 
 <style>
 body {
-  background-color: #E9F1F7;
+  background-color: #e9f1f7;
 }
 
 #app {
